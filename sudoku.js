@@ -1,4 +1,7 @@
-function read() {
+const fs =require('fs') // подключаем встроенный модуль node.js для работы с файловой системой 
+
+function read(path) {
+  return fs.readFilesSync(path, 'utf-8'); // читает файл с пазла
   /**
    * Прочесть файл puzzles.txt в кодировке 'utf-8' и вернуть эти данные из функции
    */
