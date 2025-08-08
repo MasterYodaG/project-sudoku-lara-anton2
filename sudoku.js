@@ -1,11 +1,9 @@
 const fs = require('fs');
 
-// Читаем все паззлы из файла -> [board, board, ...], где board это 9x9
 function readAll(path) {
   const lines = fs.readFileSync(path, 'utf-8').trim().split('\n');
 
   return lines.map(line => {
-    // оставляем только цифры/дефисы/точки и переводим в числа (0 = пусто)
     const vals = [...line]
       .filter(ch => /[0-9.\-]/.test(ch))
       .map(ch => (ch === '-' || ch === '.' ? 0 : Number(ch)));
@@ -15,31 +13,31 @@ function readAll(path) {
     }
 
     const board = [];
-    for (let r = 0; r < 9; r++) board.push(vals.slice(r * 9, r * 9 + 9));
+    for (let r = 0; r < 9; r++) {
+      board.push(vals.slice(r * 9, r * 9 + 9));
+    }
     return board;
   });
 }
 
-// Проверяем, можно ли поставить num в клетку (row, col)
 function isValid(board, row, col, num) {
-  // строка и колонка
   for (let i = 0; i < 9; i++) {
     if (i !== col && board[row][i] === num) return false;
     if (i !== row && board[i][col] === num) return false;
   }
-  // бокс 3x3
+
   const r0 = Math.floor(row / 3) * 3;
   const c0 = Math.floor(col / 3) * 3;
   for (let i = 0; i < 3; i++) {
     for (let j = 0; j < 3; j++) {
-      const rr = r0 + i, cc = c0 + j;
+      const rr = r0 + i,
+        cc = c0 + j;
       if ((rr !== row || cc !== col) && board[rr][cc] === num) return false;
     }
   }
   return true;
 }
 
-// Бэктрекинг
 function solve(board) {
   for (let r = 0; r < 9; r++) {
     for (let c = 0; c < 9; c++) {
@@ -51,25 +49,24 @@ function solve(board) {
             board[r][c] = 0;
           }
         }
-        return false; // в эту клетку ничего не подошло
+        return false;
       }
     }
   }
-  return true; // нет пустых клеток
+  return true;
 }
 
-// Проверяем, что сетка корректна (без самоконфликта)
 function isSolved(board) {
-  // нет нулей
   for (let r = 0; r < 9; r++) for (let c = 0; c < 9; c++) if (board[r][c] === 0) return false;
 
-  // уникальные 1..9 в строках/колонках/боксах
   const ok = arr => new Set(arr).size === 9 && !arr.includes(0);
+
   for (let i = 0; i < 9; i++) {
     const row = board[i];
     const col = board.map(r => r[i]);
     if (!ok(row) || !ok(col)) return false;
   }
+
   for (let r = 0; r < 9; r += 3) {
     for (let c = 0; c < 9; c += 3) {
       const box = [];
@@ -77,10 +74,10 @@ function isSolved(board) {
       if (!ok(box)) return false;
     }
   }
+
   return true;
 }
 
-// Красивый вывод
 function prettyBoard(board) {
   const sep = '------+-------+------';
   for (let i = 0; i < 9; i++) {
@@ -94,15 +91,17 @@ function prettyBoard(board) {
   }
 }
 
-//// ---- запуск ----
-const boards = readAll('./puzzles.txt'); // все головоломки из файла
-const board = boards[0];                  // например, берём первую
-
-if (solve(board)) {
+const boards = readAll('./puzzles.txt');
+boards.forEach((board, i) => {
+  console.log(`\nСудоку номер ${i + 1}:`);
   prettyBoard(board);
-  console.log('Решено?', isSolved(board));
-} else {
-  console.log('Решение не найдено');
-}
+  console.log('Решение:');
+  if (solve(board)) {
+    prettyBoard(board);
+    console.log('Решено?', isSolved(board));
+  } else {
+    console.log('Решение не найдено');
+  }
+});
 
 module.exports = { readAll, solve, isSolved, prettyBoard };
