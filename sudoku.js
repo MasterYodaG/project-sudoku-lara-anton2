@@ -21,6 +21,10 @@ function isSolved() {
    */
 }
 
+
+
+
+
 function prettyBoard() {
   /**
    * Принимает игровое поле в том формате, в котором его вернули из функции solve.
